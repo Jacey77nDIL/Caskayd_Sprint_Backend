@@ -2,6 +2,8 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { CreatorService } from './creator.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 
 @Controller('creator')
@@ -21,8 +23,9 @@ export class CreatorController {
     }
 
     @Post('metrics')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     addMetrics(@Body() body: any) {
-    return this.creatorService.addMetrics(body);
+      return this.creatorService.addMetrics(body);
     }
 }
