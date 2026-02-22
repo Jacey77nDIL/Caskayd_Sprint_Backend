@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { CreatorProfile } from "./creator.entity";
 
 @Entity()
@@ -7,12 +7,20 @@ export class CreatorMetrics {
   id: string;
 
   @Column()
+  platform: string; // instagram | tiktok
+
+  @Column({ type: "int", default: 0 })
   followers: number;
 
-  @Column("float")
+  @Column({ type: "int", default: 0 })
+  avgLikes: number;
+
+  @Column({ type: "int", default: 0 })
+  avgComments: number;
+
+  @Column({ type: "float", default: 0 })
   engagementRate: number;
 
-  @OneToOne(() => CreatorProfile)
-  @JoinColumn()
+  @ManyToOne(() => CreatorProfile)
   creator: CreatorProfile;
 }

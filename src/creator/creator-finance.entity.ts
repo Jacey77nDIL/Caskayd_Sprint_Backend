@@ -6,13 +6,25 @@ export class CreatorFinance {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  // marketplace pricing
+  @Column({ type: "float", nullable: true })
+  pricePerPost: number;
+
+  @Column({ type: "float", nullable: true })
+  pricePerStory: number;
+
+  @Column({ type: "float", nullable: true })
+  pricePerVideo: number;
+
+  // optional base rate
+  @Column({ type: "float", nullable: true })
   rate: number;
 
-  @Column()
+  // payout details
+  @Column({ nullable: true })
   bankName: string;
 
-  @Column()
+  @Column({ nullable: true })
   accountNumber: string;
 
   @OneToOne(() => CreatorProfile)
