@@ -7,6 +7,8 @@ import { ConversationService } from "./conversation.service";
 import { ChatRequestService } from "./chat-request.service";
 import { Module } from "@nestjs/common";
 import { MessageService } from "./message.service";
+import { MessageController } from "./message.controller";
+import { ConversationController } from "./conversation.controller";
 
 @Module({
   imports: [
