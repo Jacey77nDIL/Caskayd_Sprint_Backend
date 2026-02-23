@@ -20,10 +20,10 @@ export class CreatorController {
       });
     }
 
-    @Post('finance')
+   @Post('finance')
     @UseGuards(JwtAuthGuard)
-    addFinance(@Body() body: any) {
-    return this.creatorService.addFinance(body);
+    addFinance(@Req() req: any, @Body() body: any) {
+      return this.creatorService.addFinance(req.user.id, body);
     }
 
     @Post('metrics')

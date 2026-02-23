@@ -33,11 +33,22 @@ export class CreatorService {
     return this.repo.save(profile);
   }
 
-    async addFinance(data: any) {
-    const finance = this.financeRepo.create(data);
-    return this.financeRepo.save(finance);
+  async addFinance(userId: string, data: any) {
+    const creator = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!creator) {
+      throw new Error("Creator profile not found");
     }
- 
+
+    const finance = this.financeRepo.create({
+      ...data,
+      creator,
+    });
+
+    return this.financeRepo.save(finance);
+  }
   async addMetrics(data: any) {
     const engagementRate = this.calculateEngagementRate(
       data.avgLikes,
