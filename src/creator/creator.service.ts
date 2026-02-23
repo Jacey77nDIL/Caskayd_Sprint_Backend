@@ -64,20 +64,28 @@ export class CreatorService {
 
     return this.financeRepo.save(finance);
   }
-  async addMetrics(data: any) {
-    const engagementRate = this.calculateEngagementRate(
-      data.avgLikes,
-      data.avgComments,
-      data.followers,
-    );
+async addMetrics(data: any) {
+  const engagementRate = this.calculateEngagementRate(
+    data.avgLikes,
+    data.avgComments,
+    data.followers,
+  );
 
-    const metrics = this.metricsRepo.create({
-      ...data,
-      engagementRate,
-    });
+  const metrics = this.metricsRepo.create({
+    ...data,
+    engagementRate,
+  });
 
-    return this.metricsRepo.save(metrics);
-  }
+  await this.metricsRepo.save(metrics);
+
+  //sync profile
+  await this.repo.update(data.creator.id, {
+    instagramFollowers: data.followers,
+    instagramEngagementRate: engagementRate,
+  });
+
+  return metrics;
+}
 
   async filterCreators(query: any) {
   const qb = this.repo.createQueryBuilder("creator");
