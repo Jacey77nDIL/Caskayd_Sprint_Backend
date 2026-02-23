@@ -14,10 +14,8 @@ export class CreatorController {
     @Post()
     @UseGuards(JwtAuthGuard)
     create(@Req() req: any, @Body() body: any) {
-      return this.creatorService.create({
-        ...body,
-        user: req.user,
-      });
+      //console.log("USER:", req.user);
+      return this.creatorService.create(req.user.sub, body);
     }
 
    @Post('finance')

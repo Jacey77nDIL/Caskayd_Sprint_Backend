@@ -2,7 +2,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToOne,
+  ManyToOne,
   JoinColumn,
 } from "typeorm";
 import { User } from "../users/user.entity";
@@ -50,7 +50,7 @@ export class CreatorProfile {
   @Column({ nullable: true })
   profileImageUrl: string;
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 

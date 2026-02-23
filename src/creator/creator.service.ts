@@ -28,8 +28,23 @@ export class CreatorService {
       return ((likes + comments) / followers) * 100;
     }
 
-  async create(data: any) {
-    const profile = this.repo.create(data);
+  async create(userId: string, data: any) {
+    // check if profile exists
+    const existing = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (existing) {
+      Object.assign(existing, data);
+      return this.repo.save(existing);
+    }
+
+    // create new profile
+    const profile = this.repo.create({
+      ...data,
+      user: { id: userId },   
+    });
+
     return this.repo.save(profile);
   }
 
