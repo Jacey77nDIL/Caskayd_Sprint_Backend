@@ -1,7 +1,6 @@
-import { SendMessageDto } from "./dto/send-message.dto";
-import { Controller } from "@nestjs/common";
-import { Post, Body, Req, Get, Param } from "@nestjs/common";
+import { Controller, Post, Body, Get, Param, Req } from "@nestjs/common";
 import { MessageService } from "./message.service";
+import { SendMessageDto } from "./dto/send-message.dto";
 
 @Controller("messages")
 export class MessageController {
@@ -13,7 +12,7 @@ export class MessageController {
   }
 
   @Get(":conversationId")
-  get(@Param("conversationId") id: string) {
+  getMessages(@Param("conversationId") id: string) {
     return this.service.getMessages(id);
   }
 }
