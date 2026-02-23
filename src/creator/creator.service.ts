@@ -79,13 +79,23 @@ async addMetrics(data: any) {
   await this.metricsRepo.save(metrics);
 
   //sync profile
-  await this.repo.update(data.creator.id, {
-    instagramFollowers: data.followers,
-    instagramEngagementRate: engagementRate,
-  });
+   if (data.platform === "instagram") {
+    await this.repo.update(data.creator.id, {
+      instagramFollowers: data.followers,
+      instagramEngagementRate: engagementRate,
+    });
+  }
+
+  if (data.platform === "tiktok") {
+    await this.repo.update(data.creator.id, {
+      tiktokFollowers: data.followers,
+      tiktokEngagementRate: engagementRate,
+    });
+  }
 
   return metrics;
 }
+
 
   async filterCreators(query: any) {
   const qb = this.repo.createQueryBuilder("creator");
