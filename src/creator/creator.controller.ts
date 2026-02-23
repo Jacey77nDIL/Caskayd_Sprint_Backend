@@ -21,7 +21,8 @@ export class CreatorController {
    @Post('finance')
     @UseGuards(JwtAuthGuard)
     addFinance(@Req() req: any, @Body() body: any) {
-      return this.creatorService.addFinance(req.user.id, body);
+      console.log("FINANCE BODY:", body); 
+      return this.creatorService.addFinance(req.user.sub, body);
     }
 
     @Post('metrics')

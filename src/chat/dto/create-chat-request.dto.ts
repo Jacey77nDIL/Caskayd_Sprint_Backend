@@ -1,8 +1,27 @@
+import { IsNotEmpty, IsString, IsOptional, IsDateString, IsNumber } from 'class-validator';
+
 export class CreateChatRequestDto {
+  @IsString()
+  @IsNotEmpty()
   creatorId: string;
+
+  @IsString()
+  @IsNotEmpty()
   message: string;
-  briefUrl: string;
-  startDate: Date;
-  endDate: Date;
-  proposedPrice: number;
+
+  @IsOptional()
+  @IsString()
+  briefUrl?: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  proposedPrice?: number;
 }

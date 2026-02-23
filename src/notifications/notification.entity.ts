@@ -6,25 +6,28 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { User } from "../users/user.entity";
-import { Conversation } from "./conversation.entity";
 
 @Entity()
-export class Message {
+export class Notification {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Conversation)
-  conversation: Conversation;
-
   @ManyToOne(() => User)
-  sender: User;
+  recipient: User;
+
+  @Column()
+  type: string;
+  // CHAT_REQUEST | REQUEST_ACCEPTED | NEW_MESSAGE
 
   @Column("text")
-  content: string;
+  message: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column({ nullable: true })
+  relatedId: string; // requestId or conversationId
 
   @Column({ default: false })
   isRead: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

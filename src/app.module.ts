@@ -5,6 +5,8 @@ import { UsersModule } from '../src/users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CreatorModule } from './creator/creator.module';
 import { BusinessModule } from './business/business.module';
+import { Notification } from "./notifications/notification.entity";
+import { ChatModule } from './chat/chat.modules';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { BusinessModule } from './business/business.module';
     UsersModule,
     BusinessModule,
     AuthModule,
+    Notification,
+    ChatModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

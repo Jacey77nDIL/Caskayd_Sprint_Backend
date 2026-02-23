@@ -9,6 +9,8 @@ import { Module } from "@nestjs/common";
 import { MessageService } from "./message.service";
 import { MessageController } from "./message.controller";
 import { ConversationController } from "./conversation.controller";
+import { ChatParticipantGuard } from "./guards/chat-participant.guard";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { ConversationController } from "./conversation.controller";
       ChatRequest,
       Conversation,
       Message,
+      ChatParticipantGuard,
     ]),
+    NotificationsModule,
   ],
   controllers: [
     ChatRequestController,
