@@ -5,7 +5,8 @@ import { Repository } from "typeorm";
 import { ChatRequest } from "./chat-request.entity";
 import { Conversation } from "./conversation.entity";
 import { NotificationsService } from "../notifications/notifications.service";
-import { CreatorProfile } from "../creator/creator.entity";
+import { ResolveUserIdService } from "../helper/resolve-user-id.service";
+import { NotFoundException } from "@nestjs/common";
 
 @Injectable()
 export class ChatRequestService {
@@ -17,55 +18,51 @@ export class ChatRequestService {
     @InjectRepository(Conversation)
     private convoRepo: Repository<Conversation>,  
 
-     @InjectRepository(CreatorProfile)
-    private creatorRepo: Repository<CreatorProfile>,
 
+    private resolveUserIdService: ResolveUserIdService,
   ) {}
 
-    async create(dto: CreateChatRequestDto, businessId: string) {
+   async create(dto: CreateChatRequestDto, businessId: string) {
 
-      // default assume frontend sent userId
-      let creatorUserId = dto.creatorId;
+    const creatorUserId =
+      await this.resolveUserIdService.resolveUserId(dto.creatorId);
 
-      // check if it is actually a profileId
-      const profile = await this.creatorRepo.findOne({
-        where: { id: dto.creatorId },
-        relations: ["user"],
-      });
-
-      if (profile) {
-        creatorUserId = profile.user.id;
-      }
-
-      const request = await this.repo.save({
-        ...dto,
-        business: { id: businessId },
-        creator: { id: creatorUserId },  //use resolved id
-      });
-
-      // notify creator
-      await this.notifications.create(
-        creatorUserId,   // ⭐ use resolved id
-        "CHAT_REQUEST",
-        "You received a new collaboration request",
-        request.id,
-      );
-
-      return request;
-    }
-
-  findForCreator(userId: string) {
-    return this.repo.find({
-      where: { creator: { id: userId }, status: "PENDING" },
-      relations: ["business"],
+    const request = await this.repo.save({
+      ...dto,
+      business: { id: businessId },
+      creator: { id: creatorUserId },
     });
+
+    await this.notifications.create(
+      creatorUserId,
+      "CHAT_REQUEST",
+      "You received a new collaboration request",
+      request.id,
+    );
+
+    return request;
   }
+
+  async findForCreator(id: string) {
+
+  const userId =
+    await this.resolveUserIdService.resolveUserId(id);
+
+  return this.repo.find({
+    where: { creator: { id: userId }, status: "PENDING" },
+    relations: ["business"],
+  });
+}
 
     async accept(requestId: string) {
     const request = await this.repo.findOne({
-        where: { id: requestId },
-        relations: ["creator", "business"],
-    });
+    where: { id: requestId },
+    relations: ["creator", "business"],
+  });
+
+  if (!request) {
+    throw new NotFoundException("Request not found");
+  }
 
     request.status = "ACCEPTED";
     await this.repo.save(request);
@@ -86,6 +83,7 @@ export class ChatRequestService {
 
     return conversation;
     }
+
     reject(requestId: string) {
     return this.repo.update(requestId, {
         status: "REJECTED",

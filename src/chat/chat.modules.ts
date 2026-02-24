@@ -12,6 +12,7 @@ import { ConversationController } from "./conversation.controller";
 import { ChatParticipantGuard } from "./guards/chat-participant.guard";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { CreatorProfile } from "../creator/creator.entity";
+import { CommonModule } from "../helper/common.module";
 
 @Module({
   imports: [
@@ -20,8 +21,9 @@ import { CreatorProfile } from "../creator/creator.entity";
       Conversation,
       Message,
       ChatParticipantGuard,
-      CreatorProfile, 
+      CreatorProfile,
     ]),
+    CommonModule,
     NotificationsModule,
   ],
   controllers: [
