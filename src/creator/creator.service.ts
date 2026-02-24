@@ -98,7 +98,9 @@ async addMetrics(data: any) {
 
 
   async filterCreators(query: any) {
-  const qb = this.repo.createQueryBuilder("creator");
+  const qb = this.repo
+  .createQueryBuilder("creator")
+  .leftJoinAndSelect("creator.user", "user");
 
   if (query.niche) {
     qb.andWhere("JSON_CONTAINS(creator.niches, :niche)", {
@@ -127,7 +129,18 @@ async addMetrics(data: any) {
       });
     }
 
-    return qb.getMany();
+    const creators = await qb.getMany();
+
+    return creators.map(c => ({
+      profileId: c.id,
+      userId: c.user.id,
+      bio: c.bio,
+      niches: c.niches,
+      instagramFollowers: c.instagramFollowers,
+      tiktokFollowers: c.tiktokFollowers,
+      instagramEngagementRate: c.instagramEngagementRate,
+      tiktokEngagementRate: c.tiktokEngagementRate,
+    }));
   }
 
   async recommendCreators(category: string) {
@@ -141,36 +154,47 @@ async addMetrics(data: any) {
   const niches = categoryMap[category] || [];
 
   const creators = await this.repo.find({
-    relations: ["finance"],
+  relations: ["finance", "user"],
   });
 
   return creators
-    .map((creator) => {
-      const nicheMatch = creator.niches?.filter(n =>
-        niches.includes(n)
-      ).length || 0;
+  .map((creator) => {
+    const nicheMatch = creator.niches?.filter(n =>
+      niches.includes(n)
+    ).length || 0;
 
-      const followers =
-        creator.instagramFollowers + creator.tiktokFollowers;
+    const followers =
+      creator.instagramFollowers + creator.tiktokFollowers;
 
-      const engagement =
-        (creator.instagramEngagementRate +
-          creator.tiktokEngagementRate) / 2;
+    const engagement =
+      (creator.instagramEngagementRate +
+        creator.tiktokEngagementRate) / 2;
 
-      const priceScore =
-        creator.pricePerPost !== null && creator.pricePerPost < 150
-          ? 10
-          : 5;
+    const priceScore =
+      creator.pricePerPost !== null && creator.pricePerPost < 150
+        ? 10
+        : 5;
 
-      const score =
-        nicheMatch * 40 +
-        engagement * 30 +
-        Math.log10(followers + 1) * 20 +
-        priceScore * 10;
+    const score =
+      nicheMatch * 40 +
+      engagement * 30 +
+      Math.log10(followers + 1) * 20 +
+      priceScore * 10;
 
-      return { creator, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
-  }
-}
+    return {
+      score,
+
+      // ⭐ IMPORTANT ADDITIONS
+      profileId: creator.id,
+      userId: creator.user.id,
+
+      bio: creator.bio,
+      niches: creator.niches,
+      pricePerPost: creator.pricePerPost,
+      instagramFollowers: creator.instagramFollowers,
+      tiktokFollowers: creator.tiktokFollowers,
+    };
+  })
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 10);
+}}

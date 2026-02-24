@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 import { ChatRequest } from "./chat-request.entity";
 import { Conversation } from "./conversation.entity";
 import { NotificationsService } from "../notifications/notifications.service";
+import { CreatorProfile } from "../creator/creator.entity";
 
 @Injectable()
 export class ChatRequestService {
@@ -16,24 +17,41 @@ export class ChatRequestService {
     @InjectRepository(Conversation)
     private convoRepo: Repository<Conversation>,  
 
+     @InjectRepository(CreatorProfile)
+    private creatorRepo: Repository<CreatorProfile>,
+
   ) {}
 
     async create(dto: CreateChatRequestDto, businessId: string) {
-    const request = await this.repo.save({
+
+      // default assume frontend sent userId
+      let creatorUserId = dto.creatorId;
+
+      // check if it is actually a profileId
+      const profile = await this.creatorRepo.findOne({
+        where: { id: dto.creatorId },
+        relations: ["user"],
+      });
+
+      if (profile) {
+        creatorUserId = profile.user.id;
+      }
+
+      const request = await this.repo.save({
         ...dto,
         business: { id: businessId },
-        creator: { id: dto.creatorId },
-    });
+        creator: { id: creatorUserId },  //use resolved id
+      });
 
-    //notify creator
-    await this.notifications.create(
-        dto.creatorId,
+      // notify creator
+      await this.notifications.create(
+        creatorUserId,   // ⭐ use resolved id
         "CHAT_REQUEST",
         "You received a new collaboration request",
         request.id,
-    );
+      );
 
-    return request;
+      return request;
     }
 
   findForCreator(userId: string) {
