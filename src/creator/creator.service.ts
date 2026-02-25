@@ -143,6 +143,21 @@ async addMetrics(data: any) {
     }));
   }
 
+ async updateProfile(userId: string, dto: any) {
+  let profile = await this.repo.findOne({
+    where: { user: { id: userId } },
+  });
+
+  if (!profile) {
+    profile = new CreatorProfile();   // create instance safely
+    profile.user = { id: userId } as any;
+  }
+
+  Object.assign(profile, dto);
+
+  return this.repo.save(profile);
+}
+
   async recommendCreators(category: string) {
   const categoryMap = {
     restaurant: ["food", "lifestyle"],
@@ -184,7 +199,7 @@ async addMetrics(data: any) {
     return {
       score,
 
-      // ⭐ IMPORTANT ADDITIONS
+      // IMPORTANT ADDITIONS
       profileId: creator.id,
       userId: creator.user.id,
 
@@ -197,4 +212,51 @@ async addMetrics(data: any) {
   })
   .sort((a, b) => b.score - a.score)
   .slice(0, 10);
-}}
+  }
+    async getCreators(query: any) {
+      const qb = this.repo
+        .createQueryBuilder("creator")
+        .leftJoinAndSelect("creator.user", "user");
+
+      if (query.location) {
+        qb.andWhere("creator.location = :location", {
+          location: query.location,
+        });
+      }
+
+      if (query.maxPrice) {
+        qb.andWhere("creator.pricePerPost <= :price", {
+          price: query.maxPrice,
+        });
+      }
+
+      const creators = await qb.getMany();
+
+      return creators.map(c => ({
+    profileId: c.id,
+    userId: c.user.id,
+
+    // ⭐ identity
+    displayName:
+      c.instagram ||
+      c.tiktok ||
+      "Creator",
+
+    instagram: c.instagram,
+    tiktok: c.tiktok,
+
+    bio: c.bio,
+    niches: c.niches,
+
+    location: c.location,
+    pricePerPost: c.pricePerPost,
+
+    instagramFollowers: c.instagramFollowers,
+    tiktokFollowers: c.tiktokFollowers,
+
+    instagramEngagementRate: c.instagramEngagementRate,
+    tiktokEngagementRate: c.tiktokEngagementRate,
+
+    profileImageUrl: c.profileImageUrl,
+  }));
+    }}

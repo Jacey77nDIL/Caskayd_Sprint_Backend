@@ -18,4 +18,11 @@ export class UsersService {
   findByEmail(email: string) {
     return this.repo.findOne({ where: { email } });
   }
+
+  async findById(id: string) {
+  return this.repo.findOne({ where: { id } });
+  }
+  async updatePassword(id: string, password: string) {
+  await this.repo.update(id, { password });
+  }
 }

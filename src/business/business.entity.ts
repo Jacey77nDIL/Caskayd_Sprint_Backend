@@ -12,7 +12,10 @@ export class BusinessProfile {
   @Column()
   category: string;
 
-  @OneToOne(() => User)
-  @JoinColumn()
+ @OneToOne(() => User, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
   user: User;
+
+  @Column()
+  userId: string;
 }

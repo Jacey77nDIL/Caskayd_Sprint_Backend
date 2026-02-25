@@ -10,6 +10,7 @@ import { CreatorMetrics } from './creator-metrics.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([CreatorProfile, CreatorFinance, CreatorMetrics,])],
   providers: [CreatorService],
-  controllers: [CreatorController]
+  controllers: [CreatorController],
+  exports: [CreatorService]
 })
 export class CreatorModule {}

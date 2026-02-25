@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Index
 } from "typeorm";
 import { User } from "../users/user.entity";
+import { OneToOne } from "typeorm";
 
 @Entity()
 export class CreatorProfile {
@@ -20,6 +22,7 @@ export class CreatorProfile {
   niches: string[];
 
   @Column({ nullable: true })
+  @Index()
   location: string;
 
   @Column({ nullable: true })
@@ -44,15 +47,21 @@ export class CreatorProfile {
 
   // pricing for marketplace
   @Column({ type: "float", nullable: true })
+  @Index()
   pricePerPost: number;
 
   // profile image (S3)
   @Column({ nullable: true })
   profileImageUrl: string;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @OneToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn()
   user: User;
 
+  @Column()
+  userId: string;
+
+  @Column({ nullable: true })
+  displayName: string;
   
 }

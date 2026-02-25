@@ -8,5 +8,6 @@ import { BusinessProfile } from './business.entity';
   imports: [TypeOrmModule.forFeature([BusinessProfile])],
   controllers: [BusinessController],
   providers: [BusinessService],
+  exports: [BusinessService],
 })
 export class BusinessModule {}
