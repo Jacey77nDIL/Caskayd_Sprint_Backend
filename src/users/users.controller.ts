@@ -5,6 +5,8 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  UploadedFile,
+  UseInterceptors,
 } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { UsersService } from "./users.service";
@@ -13,6 +15,8 @@ import { UpdateProfileDto } from "../auth/dto/update-profile.dto";
 import { CreatorService } from "../creator/creator.service";
 import { BusinessProfile } from "../business/business.entity";
 import { BusinessService } from "../business/business.service";
+import { S3Service } from "../aws/s3.service";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 
 @Controller("users")
@@ -20,7 +24,8 @@ export class UsersController {
   constructor(
   private usersService: UsersService,
   private creatorService: CreatorService,
-  private businessService: BusinessService
+  private businessService: BusinessService,
+  private s3Service: S3Service,
 ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -63,4 +68,16 @@ export class UsersController {
 
     return { message: "Nothing updated" };
     }
+
+    @Patch("me/avatar")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req,
+  ) {
+    const url = await this.s3Service.uploadFile(file);
+
+    return this.usersService.updateAvatar(req.user.sub, url);
+  }
 }

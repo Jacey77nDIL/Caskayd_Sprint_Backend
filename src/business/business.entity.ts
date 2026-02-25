@@ -6,13 +6,25 @@ export class BusinessProfile {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
+  companyName: string;
+
+  @Column({ nullable: true })
   websiteUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   category: string;
 
- @OneToOne(() => User, { onDelete: "CASCADE" })
+  @Column({ nullable: true })
+  location: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true })
+  profileImageUrl: string;
+
+  @OneToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   user: User;
 
