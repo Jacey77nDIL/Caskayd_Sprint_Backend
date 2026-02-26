@@ -7,6 +7,7 @@ import { CreatorModule } from './creator/creator.module';
 import { BusinessModule } from './business/business.module';
 import { Notification } from "./notifications/notification.entity";
 import { ChatModule } from './chat/chat.modules';
+import { PaymentsModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ChatModule } from './chat/chat.modules';
     BusinessModule,
     AuthModule,
     Notification,
+    PaymentsModule,
     ChatModule,
     ConfigModule.forRoot({
       isGlobal: true,

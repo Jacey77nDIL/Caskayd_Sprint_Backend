@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
+import { Exclude } from 'class-transformer';
 
 export enum UserRole {
   BUSINESS = "business",
@@ -14,6 +15,7 @@ export class User {
   @Column({ unique: true })
   email!: string;
 
+  @Exclude()
   @Column()
   password!: string;
 
@@ -28,4 +30,7 @@ export class User {
 
   @Column({ nullable: true })
   profilePicture: string;
+
+  @Column({ nullable: true })
+ stripeCustomerId: string;
 }

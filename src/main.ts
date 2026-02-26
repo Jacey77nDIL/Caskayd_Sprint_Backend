@@ -1,13 +1,18 @@
 import 'reflect-metadata';
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ✅ validation
   app.useGlobalPipes(new ValidationPipe());
+
+  // ✅ enable @Exclude() & @Expose()
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
 
   const port = process.env.PORT || 3000;
 
