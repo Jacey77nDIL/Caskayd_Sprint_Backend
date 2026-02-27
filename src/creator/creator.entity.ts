@@ -18,7 +18,7 @@ export class CreatorProfile {
   bio: string;
 
   // array for recommendations
-  @Column({ type: "json", nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   niches: string[];
 
   @Column({ nullable: true })

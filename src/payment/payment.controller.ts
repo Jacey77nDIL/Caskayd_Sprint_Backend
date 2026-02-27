@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, Req, UseGuards, Headers, ForbiddenException } from "@nestjs/common";
 import { PaymentService } from "./payment.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UsersService } from "../users/users.service";
@@ -74,4 +74,28 @@ export class PaymentController {
         dto.amount
     );
     }
+
+   @Post("webhook")
+async handleWebhook(
+  @Req() req: any,
+  @Headers("x-paystack-signature") signature: string
+) {
+  const isValid = this.paystackService.verifyWebhookSignature(
+    signature,
+    req.rawBody,
+  );
+
+  if (!isValid) {
+    throw new ForbiddenException("Invalid signature");
+  }
+
+  const event = req.body;
+
+  if (event.event === "charge.success") {
+    const reference = event.data.reference;
+    await this.paymentService.markAsPaid(reference);
+  }
+
+  return { received: true };
+ }
 }

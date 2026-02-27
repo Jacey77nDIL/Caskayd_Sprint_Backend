@@ -4,12 +4,12 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true, 
+  });
 
-  // ✅ validation
   app.useGlobalPipes(new ValidationPipe());
 
-  // ✅ enable @Exclude() & @Expose()
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector)),
   );

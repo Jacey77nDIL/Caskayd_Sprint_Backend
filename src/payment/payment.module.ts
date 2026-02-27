@@ -8,14 +8,15 @@ import { PaymentController } from "./payment.controller";
 import { UsersModule } from "../users/users.module";
 import { Conversation } from "../chat/conversation.entity";
 import { PaystackService } from "./paystack.service";
+import { forwardRef } from "@nestjs/common";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, PaymentMethod, Conversation]),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [PaymentController],
   providers: [PaymentService, PaystackService,],
-  exports: [PaymentService],
+  exports: [PaymentService, PaystackService],
 })
 export class PaymentsModule {}

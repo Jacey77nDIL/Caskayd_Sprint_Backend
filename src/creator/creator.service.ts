@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatorProfile } from './creator.entity';
 import { Repository } from 'typeorm';
 import { CreatorFinance } from './creator-finance.entity';  
 import { CreatorMetrics } from './creator-metrics.entity';
+import { PaystackService } from '../payment/paystack.service';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class CreatorService {
@@ -16,6 +18,11 @@ export class CreatorService {
 
     @InjectRepository(CreatorMetrics)
     private metricsRepo: Repository<CreatorMetrics>,
+
+    private paystackService: PaystackService,
+
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
 
   ) {}
 
@@ -259,4 +266,42 @@ async addMetrics(data: any) {
 
     profileImageUrl: c.profileImageUrl,
   }));
-    }}
+    }
+  
+  async completeProfile(
+  creatorId: string,
+  bankCode: string,
+  accountNumber: string,
+) {
+  const creator = await this.userRepo.findOne({
+    where: { id: creatorId },
+  });
+
+  if (!creator) {
+    throw new NotFoundException("Creator not found");
+  }
+
+  // Save bank details
+  creator.bankCode = bankCode;
+  creator.accountNumber = accountNumber;
+
+  // 🚨 If subaccount already exists, do not recreate
+  if (!creator.subaccountCode) {
+    const subaccount = await this.paystackService.createSubaccount({
+      business_name: creator.email, // or full name if you have it
+      settlement_bank: bankCode,
+      account_number: accountNumber,
+      percentage_charge: 0,
+    });
+
+    creator.subaccountCode = subaccount.subaccount_code;
+  }
+
+  await this.userRepo.save(creator);
+
+  return {
+    message: "Profile completed and payout account connected",
+    subaccountCode: creator.subaccountCode,
+  };
+}
+  }

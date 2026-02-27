@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
@@ -33,73 +33,102 @@ export class PaymentService {
 
 
   async payCreator(business: User, creator: User, amount: number) {
-    const adminFee = Math.round(amount * PLATFORM_FEE);
-    const total = amount + adminFee;
-
-    const payment = await this.paystackService.initializePayment(
-      business.email,
-      total   // business pays total
+  if (!creator.subaccountCode) {
+    throw new BadRequestException(
+      "Creator is not configured for payouts"
     );
-
-    return {
-      paymentUrl: payment.authorization_url,
-      reference: payment.reference,
-      creatorPrice: amount,
-      platformFee: adminFee,
-      totalPayable: total,
-    };
   }
 
-  async savePayment(
-    business: User,
-    creator: User,
-    amount: number,
-    reference: string,
-    status: string,
-  ) {
-    const adminFee = Math.round(amount * PLATFORM_FEE);
-    const totalPaid = amount + adminFee;
+  const platformFee = Math.round(amount * 0.10);
+  const reference = `EDGE_${Date.now()}_${business.id}`;
 
-    const payment = this.paymentRepo.create({
-      business,
-      creator,
-      amount,               // creator price
-      adminFee,
-      creatorAmount: amount,
-      totalPaid,
-      reference,
-      status,
-    });
+  // 1️⃣ Save pending record first
+  const payment = this.paymentRepo.create({
+    business,
+    creator,
+    amount,
+    adminFee: platformFee,
+    creatorAmount: amount,
+    totalPaid: amount,
+    reference,
+    status: "pending",
+  });
 
-    return this.paymentRepo.save(payment);
-  }
+  await this.paymentRepo.save(payment);
 
-  async simulatePayment(
-    business: User,
-    creator: User,
-    amount: number,
-  ) {
-    
-    const reference = "SIM_" + Date.now();
+  // 2 Initialize split payment
+  const response = await this.paystackService.initializeSplitPayment({
+    email: business.email,
+    amount: amount * 100,
+    subaccount: creator.subaccountCode,
+    platformFee: platformFee * 100,
+    reference,
+    metadata: {
+      businessId: business.id,
+      creatorId: creator.id,
+    },
+  });
 
-    const payment = await this.savePayment(
-      business,
-      creator,
-      amount,
-      reference,
-      "success"
-    );
+  return {
+    paymentUrl: response.authorization_url,
+    reference,
+  };
+}
 
-    console.log("Payment saved:", payment);
+async savePayment(
+  business: User,
+  creator: User,
+  amount: number,
+  reference: string,
+  status: string,
+) {
+  const adminFee = Math.round(amount * PLATFORM_FEE);
+  const totalPaid = amount + adminFee;
 
-    return {
-        message: "Payment simulated successfully",
-        creatorPrice: payment.amount,
-        platformFee: payment.adminFee,
-        totalPaidByBusiness: payment.totalPaid,
-        creatorReceives: payment.creatorAmount,
-        reference: payment.reference,
-          };
-    
-  }
+  const payment = this.paymentRepo.create({
+    business,
+    creator,
+    amount,
+    adminFee,
+    creatorAmount: amount,
+    totalPaid,
+    reference,
+    status,
+  });
+
+  return this.paymentRepo.save(payment);
+ }
+
+ async simulatePayment(
+  business: User,
+  creator: User,
+  amount: number,
+) {
+  const reference = "SIM_" + Date.now();
+
+  return this.savePayment(
+    business,
+    creator,
+    amount,
+    reference,
+    "success",
+  );
+ }
+
+async markAsPaid(reference: string) {
+  const payment = await this.paymentRepo.findOne({
+    where: { reference },
+    relations: ["creator"],
+  });
+
+  if (!payment) return;
+
+  if (payment.status === "success") return; // idempotent
+
+  payment.status = "success";
+
+  await this.paymentRepo.save(payment);
+
+  console.log("Payment marked as success:", reference);
+ }
 }

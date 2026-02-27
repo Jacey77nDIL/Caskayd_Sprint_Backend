@@ -69,7 +69,7 @@ export class UsersController {
     return { message: "Nothing updated" };
     }
 
-    @Patch("me/avatar")
+  @Patch("me/avatar")
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor("file"))
   async uploadAvatar(

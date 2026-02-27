@@ -33,4 +33,14 @@ export class User {
 
   @Column({ nullable: true })
  stripeCustomerId: string;
+
+ @Column({ nullable: true })
+ subaccountCode: string;
+
+ @Column({ nullable: true })
+bankCode: string;
+
+@Column({ nullable: true })
+accountNumber: string;
+
 }

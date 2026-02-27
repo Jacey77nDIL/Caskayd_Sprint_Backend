@@ -41,4 +41,16 @@ export class CreatorController {
     getRecommended(@Query('category') category: string) {
       return this.creatorService.recommendCreators(category);
     }
+
+    @Post("complete-profile")
+  async completeProfile(
+    @Req() req,
+    @Body() body,
+  ) {
+    return this.creatorService.completeProfile(
+      req.user.id,
+      body.bankCode,
+      body.accountNumber,
+    );
+  }
 }
