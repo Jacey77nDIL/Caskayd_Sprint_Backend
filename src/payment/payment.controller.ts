@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Req, UseGuards, Headers, ForbiddenException } from "@nestjs/common";
+import { Controller, Post,Param, Get, Body, Req, UseGuards, Headers, ForbiddenException } from "@nestjs/common";
 import { PaymentService } from "./payment.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UsersService } from "../users/users.service";
 import { PaystackService } from "./paystack.service";
-
+import { RolesGuard } from "../auth/roles.guard";
+import { Roles } from "../auth/roles.decorator";
 @Controller("payments")
 export class PaymentController {
   constructor(
@@ -12,7 +13,9 @@ export class PaymentController {
     private paystackService: PaystackService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("business")
   @Post("pay")
   async payCreator(
     @Req() req,
@@ -28,36 +31,42 @@ export class PaymentController {
     );
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("creator")
+  @Get("earnings")
+async getEarnings(@Req() req) {
+  return this.paymentService.getCreatorEarnings(req.user.id);
+}
 
-  @UseGuards(JwtAuthGuard)
-    @Post("verify")
-    async verify(
-    @Req() req,
-    @Body() body: {
-        reference: string;
-        creatorId: string;
-        amount: number;
-    }
-    ) {
-    const business = req.user;
-    const creator = await this.usersService.findById(body.creatorId);
+@UseGuards(JwtAuthGuard)
+  @Get("banks")
+  async getBanks() {
+    const banks = await this.paystackService.getBanks();
 
-    const payment = await this.paystackService.verifyPayment(
-        body.reference
-    );
+    return banks.map(bank => ({
+      name: bank.name,
+      code: bank.code,
+    }));
+  }
 
-    if (payment.status === "success") {
-        await this.paymentService.savePayment(
-        business,
-        creator,
-        body.amount,
-        body.reference,
-        "success"
-        );
-    }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  @Get("admin/revenue")
+async getRevenue() {
+  return this.paymentService.getAdminRevenue();
+}
 
-    return payment;
-    }
+  @Get("verify/:reference")
+@UseGuards(JwtAuthGuard)
+async verify(@Param("reference") reference: string) {
+  const payment = await this.paystackService.verifyPayment(reference);
+
+  return {
+    reference,
+    status: payment.status,
+    amount: payment.amount / 100,
+  };
+}
 
   @UseGuards(JwtAuthGuard)
     @Post("simulate")
@@ -75,6 +84,7 @@ export class PaymentController {
     );
     }
 
+    
    @Post("webhook")
 async handleWebhook(
   @Req() req: any,

@@ -131,4 +131,52 @@ async markAsPaid(reference: string) {
 
   console.log("Payment marked as success:", reference);
  }
+
+ async getCreatorEarnings(creatorId: string) {
+  const payments = await this.paymentRepo.find({
+    where: {
+      creator: { id: creatorId },
+    },
+  });
+
+  const completed = payments.filter(p => p.status === "success");
+  const pending = payments.filter(p => p.status === "pending");
+
+  const totalEarned = completed.reduce(
+    (sum, p) => sum + p.creatorAmount,
+    0
+  );
+
+  return {
+    totalEarned,
+    completedPayments: completed.length,
+    pendingPayments: pending.length,
+    totalTransactions: payments.length,
+  };
+}
+
+async getAdminRevenue() {
+  const payments = await this.paymentRepo.find();
+
+  const successful = payments.filter(p => p.status === "success");
+  const failed = payments.filter(p => p.status === "failed");
+
+  const totalRevenue = successful.reduce(
+    (sum, p) => sum + p.totalPaid,
+    0
+  );
+
+  const platformProfit = successful.reduce(
+    (sum, p) => sum + p.adminFee,
+    0
+  );
+
+  return {
+    totalRevenue,
+    platformProfit,
+    totalTransactions: payments.length,
+    successfulPayments: successful.length,
+    failedPayments: failed.length,
+  };
+}
 }

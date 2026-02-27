@@ -85,4 +85,17 @@ export class PaystackService {
 
   return response.data.data;
 }
+
+async getBanks() {
+  const response = await axios.get(
+    "https://api.paystack.co/bank",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      },
+    }
+  );
+
+  return response.data.data;
+}
 }
