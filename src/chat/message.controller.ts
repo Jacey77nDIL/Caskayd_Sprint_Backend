@@ -12,6 +12,8 @@ import { MessageService } from "./message.service";
 import { SendMessageDto } from "./dto/send-message.dto";
 import { ChatParticipantGuard } from "./guards/chat-participant.guard";
 import { AuthGuard } from "@nestjs/passport";
+import { UseInterceptors, UploadedFile } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("messages")
 export class MessageController {
@@ -25,8 +27,17 @@ export class MessageController {
 
   @UseGuards(AuthGuard("jwt"), ChatParticipantGuard)
   @Post()
-  send(@Body() dto: SendMessageDto, @Req() req) {
-    return this.service.send(dto, req.user.sub);
+  @UseInterceptors(
+  FileInterceptor("file", {
+    limits: { fileSize: 50 * 1024 * 1024 },
+  }),
+  )
+  async sendMessage(
+    @Body() dto: SendMessageDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req,
+  ) {
+    return this.service.sendMessage(dto, file, req.user);
   }
 
   @UseGuards(AuthGuard("jwt"))

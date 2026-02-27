@@ -3,27 +3,28 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuid } from "uuid";
 
 @Injectable()
-export class S3Service {
-  private s3 = new S3Client({
-    region: process.env.AWS_REGION,
+export class R2Service {
+  private r2 = new S3Client({
+    region: "auto",
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     },
   });
 
   async uploadFile(file: Express.Multer.File) {
     const key = `uploads/${uuid()}-${file.originalname}`;
 
-    await this.s3.send(
+    await this.r2.send(
       new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.R2_BUCKET_NAME,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
       }),
     );
 
-    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return `${process.env.R2_PUBLIC_URL}/${key}`;
   }
 }

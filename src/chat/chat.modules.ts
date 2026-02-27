@@ -13,6 +13,7 @@ import { ChatParticipantGuard } from "./guards/chat-participant.guard";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { CreatorProfile } from "../creator/creator.entity";
 import { CommonModule } from "../helper/common.module";
+import { R2Service } from "./r2.service";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CommonModule } from "../helper/common.module";
     ChatRequestService,
     ConversationService,
     MessageService,
+    R2Service,
   ],
 })
 export class ChatModule {}

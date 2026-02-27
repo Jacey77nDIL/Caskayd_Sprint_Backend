@@ -6,6 +6,7 @@ import { Injectable } from "@nestjs/common";
 import { NotificationsService } from "../notifications/notifications.service";
 import { Conversation } from "./conversation.entity";
 import { Not } from "typeorm";
+import { R2Service } from "./r2.service";
 
 @Injectable()
 export class MessageService {
@@ -17,26 +18,39 @@ export class MessageService {
   private convoRepo: Repository<Conversation>,
 
   private notifications: NotificationsService,
+
+  private r2Service: R2Service,
 ) {}
-async send(dto: SendMessageDto, senderId: string) {
+
+async sendMessage(
+  dto: SendMessageDto,
+  file: Express.Multer.File,
+  user: any,
+) {
+  let fileData = {};
+
+  if (file) {
+    fileData = await this.r2Service.uploadFile(file);
+  }
+
   const message = await this.repo.save({
     conversation: { id: dto.conversationId },
-    sender: { id: senderId },
+    sender: { id: user.sub },
+    type: dto.type,
     content: dto.content,
+    ...fileData,
   });
 
-  // find conversation participants
   const conversation = await this.convoRepo.findOne({
     where: { id: dto.conversationId },
     relations: ["creator", "business"],
   });
 
   const recipientId =
-    conversation.creator.id === senderId
+    conversation.creator.id === user.sub
       ? conversation.business.id
       : conversation.creator.id;
 
-  //  notify recipient
   await this.notifications.create(
     recipientId,
     "NEW_MESSAGE",

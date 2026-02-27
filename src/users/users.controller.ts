@@ -15,7 +15,7 @@ import { UpdateProfileDto } from "../auth/dto/update-profile.dto";
 import { CreatorService } from "../creator/creator.service";
 import { BusinessProfile } from "../business/business.entity";
 import { BusinessService } from "../business/business.service";
-import { S3Service } from "../aws/s3.service";
+import { R2Service } from "../aws/s3.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 
 
@@ -25,7 +25,7 @@ export class UsersController {
   private usersService: UsersService,
   private creatorService: CreatorService,
   private businessService: BusinessService,
-  private s3Service: S3Service,
+  private r2Service: R2Service,
 ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -76,7 +76,7 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
   ) {
-    const url = await this.s3Service.uploadFile(file);
+    const url = await this.r2Service.uploadFile(file);
 
     return this.usersService.updateAvatar(req.user.sub, url);
   }

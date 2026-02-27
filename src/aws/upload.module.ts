@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { S3Service } from "./s3.service";
+import { R2Service } from "./s3.service";
 
 @Module({
-  providers: [S3Service],
+  providers: [R2Service],
   imports: [UploadModule],
-  exports: [S3Service],
+  exports: [R2Service],
 })
 export class UploadModule {}
