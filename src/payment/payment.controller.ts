@@ -68,7 +68,8 @@ async verify(@Param("reference") reference: string) {
   };
 }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles("admin")
     @Post("simulate")
     async simulate(
     @Req() req,
