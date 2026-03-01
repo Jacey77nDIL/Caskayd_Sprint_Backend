@@ -16,12 +16,13 @@ export class User {
   email!: string;
 
   @Exclude()
-  @Column()
+  @Column({ select: false })
   password!: string;
 
   @Column({
     type: "enum",
     enum: UserRole,
+    enumName: "user_role_enum",
   })
   role!: UserRole;
 
