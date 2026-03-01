@@ -15,12 +15,24 @@ export class UsersService {
     return this.repo.save(user);
   }
 
-  findByEmail(email: string) {
-    return this.repo.findOne({ where: { email } });
+ async findByEmail(email: string) {
+  return this.repo.findOne({
+      where: { email },
+      select: ["id", "email", "password", "role"],
+    });
   }
 
-  async findById(id: string) {
-  return this.repo.findOne({ where: { id } });
+  async findById(id: string, includePassword = false) {
+  if (includePassword) {
+      return this.repo.findOne({
+        where: { id },
+        select: ["id", "email", "password", "role"],
+      });
+    }
+
+    return this.repo.findOne({
+      where: { id },
+    });
   }
 
   async updatePassword(id: string, password: string) {
@@ -34,10 +46,10 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      user.profilePicture = url;
+      user.avatar = url;
 
       await this.repo.save(user);
 
-      return { profilePicture: url };
+      return { avatar: url };
     }
   }

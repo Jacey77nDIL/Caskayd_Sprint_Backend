@@ -15,9 +15,9 @@ import { UpdateProfileDto } from "../auth/dto/update-profile.dto";
 import { CreatorService } from "../creator/creator.service";
 import { BusinessProfile } from "../business/business.entity";
 import { BusinessService } from "../business/business.service";
-import { R2Service } from "../aws/s3.service";
+import { SupabaseService } from "../supabase/supabase.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-
+import { BadRequestException } from "@nestjs/common";
 
 @Controller("users")
 export class UsersController {
@@ -25,7 +25,7 @@ export class UsersController {
   private usersService: UsersService,
   private creatorService: CreatorService,
   private businessService: BusinessService,
-  private r2Service: R2Service,
+  private supabaseService: SupabaseService,
 ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -34,7 +34,7 @@ export class UsersController {
     @Req() req,
     @Body() body: { currentPassword: string; newPassword: string }
   ) {
-    const user = await this.usersService.findById(req.user.sub);
+    const user = await this.usersService.findById(req.user.sub, true);
 
     const valid = await bcrypt.compare(
       body.currentPassword,
@@ -71,12 +71,35 @@ export class UsersController {
 
   @Patch("me/avatar")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(
+    FileInterceptor("file", {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+        ];
+
+        if (!allowedTypes.includes(file.mimetype)) {
+          return cb(
+            new BadRequestException("Only JPG, PNG, and WEBP files allowed"),
+            false
+          );
+        }
+
+        cb(null, true);
+      },
+    }),
+  )
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
   ) {
-    const url = await this.r2Service.uploadFile(file);
+    const url = await this.supabaseService.uploadAvatar(
+      file,
+      req.user.sub
+    );
 
     return this.usersService.updateAvatar(req.user.sub, url);
   }

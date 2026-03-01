@@ -9,7 +9,7 @@ export class NotificationsController {
   @UseGuards(AuthGuard("jwt"))
   @Get()
   getMyNotifications(@Req() req) {
-    return this.service.getUserNotifications(req.user.id);
+    return this.service.getUserNotifications(req.user.sub);
   }
 
   @UseGuards(AuthGuard("jwt"))

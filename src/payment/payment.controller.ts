@@ -21,7 +21,7 @@ export class PaymentController {
     @Req() req,
     @Body() dto: { creatorId: string; amount: number }
   ) {
-    const business = req.user;
+    const business = await this.usersService.findById(req.user.sub);
     const creator = await this.usersService.findById(dto.creatorId);
 
     return this.paymentService.payCreator(
@@ -35,7 +35,7 @@ export class PaymentController {
   @Roles("creator")
   @Get("earnings")
 async getEarnings(@Req() req) {
-  return this.paymentService.getCreatorEarnings(req.user.id);
+  return this.paymentService.getCreatorEarnings(req.user.sub);
 }
 
 @UseGuards(JwtAuthGuard)
@@ -75,7 +75,7 @@ async verify(@Param("reference") reference: string) {
     @Req() req,
     @Body() dto: { creatorId: string; amount: number }
     ) {
-    const business = await this.usersService.findById(req.user.userId);
+    const business = await this.usersService.findById(req.user.sub);
     const creator = await this.usersService.findById(dto.creatorId);
 
     return this.paymentService.simulatePayment(
@@ -103,7 +103,26 @@ async handleWebhook(
   const event = req.body;
 
   if (event.event === "charge.success") {
-    const reference = event.data.reference;
+  const { reference, amount, status } = event.data;
+
+  if (status !== "success") {
+    return { received: true };
+  }
+
+  const payment = await this.paymentService.findByReference(reference);
+
+    if (!payment) {
+      throw new ForbiddenException("Payment not found");
+    }
+
+    if (payment.status === "paid") {
+      return { received: true }; // prevent duplicate processing
+    }
+
+    if (payment.amount !== amount / 100) {
+      throw new ForbiddenException("Amount mismatch");
+    }
+
     await this.paymentService.markAsPaid(reference);
   }
 

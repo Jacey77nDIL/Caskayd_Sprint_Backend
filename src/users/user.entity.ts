@@ -30,9 +30,6 @@ export class User {
   createdAt!: Date;
 
   @Column({ nullable: true })
-  profilePicture: string;
-
-  @Column({ nullable: true })
  stripeCustomerId: string;
 
  @Column({ nullable: true })
@@ -44,4 +41,7 @@ bankCode: string;
 @Column({ nullable: true })
 accountNumber: string;
 
+
+ @Column({ nullable: true })
+avatar: string;
 }

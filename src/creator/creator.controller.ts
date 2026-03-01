@@ -14,14 +14,12 @@ export class CreatorController {
     @Post()
     @UseGuards(JwtAuthGuard)
     create(@Req() req: any, @Body() body: any) {
-      //console.log("USER:", req.user);
       return this.creatorService.create(req.user.sub, body);
     }
 
    @Post('finance')
     @UseGuards(JwtAuthGuard)
     addFinance(@Req() req: any, @Body() body: any) {
-      console.log("FINANCE BODY:", body); 
       return this.creatorService.addFinance(req.user.sub, body);
     }
 
@@ -48,7 +46,7 @@ export class CreatorController {
     @Body() body,
   ) {
     return this.creatorService.completeProfile(
-      req.user.id,
+      req.user.sub,
       body.bankCode,
       body.accountNumber,
     );

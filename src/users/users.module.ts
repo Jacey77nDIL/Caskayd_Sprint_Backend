@@ -8,6 +8,7 @@ import { BusinessModule } from "../business/business.module";
 import { UploadModule } from "../aws/upload.module";
 import { forwardRef } from '@nestjs/common';
 import { PaymentsModule } from '../payment/payment.module';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]),
@@ -16,7 +17,7 @@ import { PaymentsModule } from '../payment/payment.module';
   UploadModule,
 forwardRef(() => PaymentsModule)],
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [UsersService,  SupabaseService],
+  exports: [UsersService,],
 })
 export class UsersModule {}

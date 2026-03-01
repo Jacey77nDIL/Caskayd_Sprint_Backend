@@ -42,7 +42,7 @@ export class PaymentService {
   const platformFee = Math.round(amount * 0.10);
   const reference = `EDGE_${Date.now()}_${business.id}`;
 
-  // 1️⃣ Save pending record first
+  // 1️ Save pending record first
   const payment = this.paymentRepo.create({
     business,
     creator,
@@ -178,5 +178,11 @@ async getAdminRevenue() {
     successfulPayments: successful.length,
     failedPayments: failed.length,
   };
+ }
+
+ async findByReference(reference: string) {
+  return this.paymentRepo.findOne({
+    where: { reference },
+  });
 }
 }
