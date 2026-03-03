@@ -11,8 +11,20 @@ export class BusinessService {
     private repo: Repository<BusinessProfile>,
   ) {}
 
-  create(data: any) {
-    const profile = this.repo.create(data);
+  async create(userId: string, data: any) {
+  const existing = await this.repo.findOne({
+    where: { user: { id: userId } },
+  });
+
+    if (existing) {
+      return existing; 
+    }
+
+    const profile = this.repo.create({
+      ...data,
+      user: { id: userId },
+    });
+
     return this.repo.save(profile);
   }
 
