@@ -40,6 +40,7 @@ export class CreatorController {
       return this.creatorService.recommendCreators(category);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post("complete-profile")
   async completeProfile(
     @Req() req,
