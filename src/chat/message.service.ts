@@ -6,7 +6,7 @@ import { Injectable } from "@nestjs/common";
 import { NotificationsService } from "../notifications/notifications.service";
 import { Conversation } from "./conversation.entity";
 import { Not } from "typeorm";
-import { R2Service } from "./r2.service";
+import { SupabaseService } from "../supabase/supabase.service";
 
 @Injectable()
 export class MessageService {
@@ -19,7 +19,7 @@ export class MessageService {
 
   private notifications: NotificationsService,
 
-  private r2Service: R2Service,
+  private supabaseService: SupabaseService,
 ) {}
 
 async sendMessage(
@@ -30,7 +30,7 @@ async sendMessage(
   let fileData = {};
 
   if (file) {
-    fileData = await this.r2Service.uploadFile(file);
+    fileData = await this.supabaseService.uploadFile(file);
   }
 
   const message = await this.repo.save({

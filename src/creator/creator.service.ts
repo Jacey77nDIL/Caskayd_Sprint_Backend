@@ -103,6 +103,28 @@ async addMetrics(data: any) {
   return metrics;
 }
 
+async getAllCreators() {
+  const creators = await this.repo.find();
+
+  return creators.map(c => ({
+    profileId: c.id,
+
+    bio: c.bio,
+    niches: c.niches,
+
+    location: c.location,
+    price: c.pricePerPost,
+
+    links: {
+      instagram: c.instagram,
+      tiktok: c.tiktok
+    },
+
+    instagramFollowers: c.instagramFollowers,
+    tiktokFollowers: c.tiktokFollowers,
+  }));
+
+}
 
   async filterCreators(query: any) {
   const qb = this.repo

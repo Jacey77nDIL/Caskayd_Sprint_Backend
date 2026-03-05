@@ -13,7 +13,7 @@ import { ChatParticipantGuard } from "./guards/chat-participant.guard";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { CreatorProfile } from "../creator/creator.entity";
 import { CommonModule } from "../helper/common.module";
-import { R2Service } from "./r2.service";
+import { SupabaseService } from "../supabase/supabase.service";
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { R2Service } from "./r2.service";
     ChatRequestService,
     ConversationService,
     MessageService,
-    R2Service,
+    SupabaseService,
   ],
 })
 export class ChatModule {}

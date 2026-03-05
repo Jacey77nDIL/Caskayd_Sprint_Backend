@@ -30,6 +30,11 @@ export class CreatorController {
       return this.creatorService.addMetrics(body);
     }
 
+    @Get('all')
+  getAllCreators() {
+    return this.creatorService.getAllCreators();
+  }
+  
     @Get()
     getCreators(@Query() query: any) {
       return this.creatorService.filterCreators(query);

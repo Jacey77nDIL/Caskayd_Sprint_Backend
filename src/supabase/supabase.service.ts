@@ -25,4 +25,22 @@ export class SupabaseService {
 
     return data.publicUrl;
   }
+
+  async uploadFile(file: Express.Multer.File) {
+    const fileName = `chat/${Date.now()}-${file.originalname}`;
+
+    const { error } = await this.supabase.storage
+      .from("chat-media")
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+      });
+
+    if (error) throw new Error(error.message);
+
+    const { data } = this.supabase.storage
+      .from("chat-media")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  }
 }

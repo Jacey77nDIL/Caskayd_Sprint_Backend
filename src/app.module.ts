@@ -1,23 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+
 import { UsersModule } from '../src/users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CreatorModule } from './creator/creator.module';
 import { BusinessModule } from './business/business.module';
-import { Notification } from "./notifications/notification.entity";
 import { ChatModule } from './chat/chat.modules';
 import { PaymentsModule } from './payment/payment.module';
 
 @Module({
   imports: [
-    CreatorModule,
-    UsersModule,
-    BusinessModule,
-    AuthModule,
-    Notification,
-    PaymentsModule,
-    ChatModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -25,14 +18,20 @@ import { PaymentsModule } from './payment/payment.module';
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
+
+    UsersModule,
+    AuthModule,
+    CreatorModule,
+    BusinessModule,
+    PaymentsModule,
+    ChatModule,
   ],
 })
 export class AppModule {}
