@@ -57,14 +57,45 @@ async getRevenue() {
 }
 
   @Get("verify/:reference")
-@UseGuards(JwtAuthGuard)
-async verify(@Param("reference") reference: string) {
-  const payment = await this.paystackService.verifyPayment(reference);
+  @UseGuards(JwtAuthGuard)
+  async verify(@Param("reference") reference: string) {
+    const payment = await this.paystackService.verifyPayment(reference);
+
+    if (payment.status === "success") {
+      await this.paymentService.markAsPaid(reference);
+    }
+
+    return {
+      reference,
+      status: payment.status,
+      amount: payment.amount / 100,
+    };
+  }
+
+  @Post("creator/subaccount")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles("creator")
+async createSubaccount(
+  @Req() req,
+  @Body() dto: { bankCode: string; accountNumber: string }
+) {
+  const creator = await this.usersService.findById(req.user.sub);
+
+  const sub = await this.paystackService.createSubaccount({
+    business_name: creator.email,
+    settlement_bank: dto.bankCode,
+    account_number: dto.accountNumber,
+  });
+
+  creator.subaccountCode = sub.subaccount_code;
+
+  await this.usersService.update(creator.id, {
+    subaccountCode: sub.subaccount_code,
+  });
 
   return {
-    reference,
-    status: payment.status,
-    amount: payment.amount / 100,
+    message: "Subaccount created",
+    subaccountCode: sub.subaccount_code,
   };
 }
 
@@ -115,7 +146,7 @@ async handleWebhook(
       throw new ForbiddenException("Payment not found");
     }
 
-    if (payment.status === "paid") {
+    if (payment.status === "success") {
       return { received: true }; // prevent duplicate processing
     }
 

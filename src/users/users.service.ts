@@ -52,4 +52,9 @@ export class UsersService {
 
       return { avatar: url };
     }
+
+    async update(id: string, data: Partial<User>) {
+  await this.repo.update(id, data);
+  return this.repo.findOne({ where: { id } });
+ }
   }
