@@ -8,7 +8,7 @@ import { CreatorModule } from './creator/creator.module';
 import { BusinessModule } from './business/business.module';
 import { ChatModule } from './chat/chat.modules';
 import { PaymentsModule } from './payment/payment.module';
-
+import { UploadModule } from './supabase/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,6 +32,7 @@ import { PaymentsModule } from './payment/payment.module';
     BusinessModule,
     PaymentsModule,
     ChatModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
