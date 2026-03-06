@@ -40,6 +40,7 @@ export class PaymentService {
   }
 
   const platformFee = Math.round(amount * 0.10);
+  const totalPaid = amount + platformFee;
   const reference = `EDGE_${Date.now()}_${business.id}`;
 
   // 1️ Save pending record first
@@ -49,7 +50,7 @@ export class PaymentService {
     amount,
     adminFee: platformFee,
     creatorAmount: amount,
-    totalPaid: amount,
+    totalPaid: totalPaid,
     reference,
     status: "pending",
   });
@@ -59,7 +60,7 @@ export class PaymentService {
   // 2 Initialize split payment
   const response = await this.paystackService.initializeSplitPayment({
     email: business.email,
-    amount: amount * 100,
+    amount: totalPaid * 100,
     subaccount: creator.subaccountCode,
     platformFee: platformFee * 100,
     reference,
