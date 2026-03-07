@@ -58,8 +58,8 @@ export class UsersService {
   return this.repo.findOne({ where: { id } });
  }
 
- async getMarketplaceProfiles() {
-  const users = await this.repo
+ async getMarketplaceProfile(userId: string) {
+  const user = await this.repo
     .createQueryBuilder("user")
     .leftJoin("creator_profile", "creator", "creator.userId = user.id")
     .leftJoin("business_profile", "business", "business.userId = user.id")
@@ -67,18 +67,20 @@ export class UsersService {
       "user.id AS id",
       "user.email AS email",
       "user.avatar AS avatar",
+      "user.role AS role",
       "creator.displayName AS displayName",
       "business.companyName AS companyName",
     ])
-    .getRawMany();
+    .where("user.id = :userId", { userId })
+    .getRawOne();
 
-  return users.map((u) => ({
-    id: u.id,
-    email: u.email,
-    avatar: u.avatar,
-
-    displayName: u.displayName || null,
-    businessName: u.businessName || null,
-  }));
+  return {
+    id: user.id,
+    email: user.email,
+    avatar: user.avatar,
+    role: user.role,
+    displayName: user.displayName || null,
+    companyName: user.companyName || null,
+  };
 }
   }

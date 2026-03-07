@@ -116,8 +116,9 @@ export class UsersController {
     return this.usersService.updateAvatar(req.user.sub, url);
   }
 
-  @Get("profiles")
- getProfiles() {
-  return this.usersService.getMarketplaceProfiles();
+ @UseGuards(JwtAuthGuard)
+@Get("profile")
+getProfile(@Req() req) {
+  return this.usersService.getMarketplaceProfile(req.user.sub);
 }
 }
