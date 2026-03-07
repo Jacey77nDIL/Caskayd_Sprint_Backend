@@ -14,6 +14,7 @@ import { ChatParticipantGuard } from "./guards/chat-participant.guard";
 import { AuthGuard } from "@nestjs/passport";
 import { UseInterceptors, UploadedFile } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { memoryStorage } from "multer";
 
 @Controller("messages")
 export class MessageController {
@@ -29,6 +30,7 @@ export class MessageController {
   @Post()
   @UseInterceptors(
   FileInterceptor("file", {
+    storage: memoryStorage(),
     limits: { fileSize: 50 * 1024 * 1024 },
   }),
   )
