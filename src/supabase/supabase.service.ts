@@ -20,13 +20,13 @@ export class SupabaseService {
     if (error) throw new Error(error.message);
 
     const { data } = this.supabase.storage
-      .from("profile-images") //bucket name
+      .from("profile-images")
       .getPublicUrl(fileName);
 
     return data.publicUrl;
   }
 
-  async uploadFile(file: Express.Multer.File) {
+  async uploadChatMedia(file: Express.Multer.File) {
     const fileName = `chat/${Date.now()}-${file.originalname}`;
 
     const { error } = await this.supabase.storage

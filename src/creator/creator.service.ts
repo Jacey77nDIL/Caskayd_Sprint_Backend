@@ -107,22 +107,28 @@ async getAllCreators() {
   const creators = await this.repo.find();
 
   return creators.map(c => ({
-    profileId: c.id,
+  profileId: c.id,
 
-    bio: c.bio,
-    niches: c.niches,
+  displayName: c.displayName,
+  bio: c.bio,
+  niches: c.niches,
 
-    location: c.location,
-    price: c.pricePerPost,
+  location: c.location,
+  pricePerPost: c.pricePerPost,
 
-    links: {
-      instagram: c.instagram,
-      tiktok: c.tiktok
-    },
+  links: {
+    instagram: c.instagram,
+    tiktok: c.tiktok
+  },
 
-    instagramFollowers: c.instagramFollowers,
-    tiktokFollowers: c.tiktokFollowers,
-  }));
+  instagramFollowers: c.instagramFollowers,
+  tiktokFollowers: c.tiktokFollowers,
+
+  instagramEngagementRate: c.instagramEngagementRate,
+  tiktokEngagementRate: c.tiktokEngagementRate,
+
+  profileImageUrl: c.profileImageUrl
+}));
 
 }
 
@@ -131,11 +137,11 @@ async getAllCreators() {
   .createQueryBuilder("creator")
   .leftJoinAndSelect("creator.user", "user");
 
-  if (query.niche) {
-    qb.andWhere("JSON_CONTAINS(creator.niches, :niche)", {
-      niche: JSON.stringify(query.niche),
+    if (query.niche) {
+    qb.andWhere("creator.niches @> :niche", {
+      niche: JSON.stringify([query.niche]),
     });
-  }
+  };
 
   if (query.minFollowers) {
     qb.andWhere(
@@ -161,15 +167,29 @@ async getAllCreators() {
     const creators = await qb.getMany();
 
     return creators.map(c => ({
-      profileId: c.id,
-      userId: c.user.id,
-      bio: c.bio,
-      niches: c.niches,
-      instagramFollowers: c.instagramFollowers,
-      tiktokFollowers: c.tiktokFollowers,
-      instagramEngagementRate: c.instagramEngagementRate,
-      tiktokEngagementRate: c.tiktokEngagementRate,
-    }));
+    profileId: c.id,
+    userId: c.user.id,
+
+    displayName: c.displayName,
+    location: c.location,
+    pricePerPost: c.pricePerPost,
+
+    links: {
+      instagram: c.instagram,
+      tiktok: c.tiktok,
+    },
+
+    bio: c.bio,
+    niches: c.niches,
+
+    instagramFollowers: c.instagramFollowers,
+    tiktokFollowers: c.tiktokFollowers,
+
+    instagramEngagementRate: c.instagramEngagementRate,
+    tiktokEngagementRate: c.tiktokEngagementRate,
+
+    profileImageUrl: c.profileImageUrl
+  }));
   }
 
  async updateProfile(userId: string, dto: any) {
@@ -267,8 +287,9 @@ async getAllCreators() {
 
     // ⭐ identity
     displayName:
+      c.displayName ||
       c.instagram ||
-      c.tiktok ||
+      c.tiktok || 
       "Creator",
 
     instagram: c.instagram,
@@ -325,5 +346,5 @@ async getAllCreators() {
     message: "Profile completed and payout account connected",
     subaccountCode: creator.subaccountCode,
   };
-}
   }
+}
