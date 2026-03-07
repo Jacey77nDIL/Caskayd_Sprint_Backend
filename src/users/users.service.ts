@@ -57,4 +57,28 @@ export class UsersService {
   await this.repo.update(id, data);
   return this.repo.findOne({ where: { id } });
  }
+
+ async getMarketplaceProfiles() {
+  const users = await this.repo
+    .createQueryBuilder("user")
+    .leftJoin("creator_profile", "creator", "creator.userId = user.id")
+    .leftJoin("business_profile", "business", "business.userId = user.id")
+    .select([
+      "user.id AS id",
+      "user.email AS email",
+      "user.avatar AS avatar",
+      "creator.displayName AS displayName",
+      "business.businessName AS businessName",
+    ])
+    .getRawMany();
+
+  return users.map((u) => ({
+    id: u.id,
+    email: u.email,
+    avatar: u.avatar,
+
+    displayName: u.displayName || null,
+    businessName: u.businessName || null,
+  }));
+}
   }

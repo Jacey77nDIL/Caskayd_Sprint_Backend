@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Patch,
   Body,
   Req,
@@ -114,4 +115,9 @@ export class UsersController {
 
     return this.usersService.updateAvatar(req.user.sub, url);
   }
+
+  @Get("profiles")
+ getProfiles() {
+  return this.usersService.getMarketplaceProfiles();
+}
 }

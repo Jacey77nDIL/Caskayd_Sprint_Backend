@@ -41,7 +41,7 @@ export class PaymentService {
 
   const platformFee = Math.round(amount * 0.10);
   const totalPaid = amount + platformFee;
-  const reference = `EDGE_${Date.now()}_${business.id}`;
+  const reference = `Caskayd_${Date.now()}_${business.id}`;
 
   // 1️ Save pending record first
   const payment = this.paymentRepo.create({
