@@ -68,7 +68,7 @@ export class UsersService {
       "user.email AS email",
       "user.avatar AS avatar",
       "creator.displayName AS displayName",
-      "business.businessName AS businessName",
+      "business.companyName AS companyName",
     ])
     .getRawMany();
 
