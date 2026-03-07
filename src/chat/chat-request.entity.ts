@@ -4,7 +4,7 @@ import {
   Column,
   OneToOne,
   ManyToOne,
-  CreateDateColumn
+  CreateDateColumn,
 } from "typeorm";
 import { User } from "../users/user.entity";
 
@@ -22,16 +22,16 @@ export class ChatRequest {
   @Column("text")
   message: string;
 
-  @Column()
+  @Column({ nullable: true })
   briefUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   startDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   endDate: Date;
 
-  @Column("decimal")
+  @Column("decimal", { nullable: true} )
   proposedPrice: number;
 
   @Column({
