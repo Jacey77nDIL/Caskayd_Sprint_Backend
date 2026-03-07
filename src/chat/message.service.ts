@@ -30,7 +30,7 @@ async sendMessage(
   let fileData = {};
 
   if (file) {
-    fileData = await this.supabaseService.uploadFile(file);
+    fileData = await this.supabaseService.uploadChatMedia(file);
   }
 
   const message = await this.repo.save({
