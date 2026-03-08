@@ -8,10 +8,11 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  // ✅ ENABLE CORS
   app.enableCors({
     origin: [
       'http://localhost:3001',
+      'https://caskayd-sprint-frontend.vercel.app',
+      'https://caskayd.com',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
