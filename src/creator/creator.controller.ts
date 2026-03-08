@@ -12,7 +12,8 @@ export class CreatorController {
   constructor(private creatorService: CreatorService) {}
 
     @Post()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard , RolesGuard)
+    @Roles("creator")
     create(@Req() req: any, @Body() body: any) {
       return this.creatorService.create(req.user.sub, body);
     }
