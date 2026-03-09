@@ -121,4 +121,5 @@ export class UsersController {
 getProfile(@Req() req) {
   return this.usersService.getMarketplaceProfile(req.user.sub);
 }
+ 
 }

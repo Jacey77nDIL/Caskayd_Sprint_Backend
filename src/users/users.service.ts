@@ -68,19 +68,23 @@ export class UsersService {
       "user.email AS email",
       "user.avatar AS avatar",
       "user.role AS role",
-      "creator.displayName AS displayName",
-      "business.companyName AS companyName",
+      "creator.displayName AS creatorDisplayName",
+      "business.companyName AS businessName",
     ])
     .where("user.id = :userId", { userId })
     .getRawOne();
+
+  const displayName =
+    user.creatorDisplayName || user.businessName || null;
 
   return {
     id: user.id,
     email: user.email,
     avatar: user.avatar,
     role: user.role,
-    displayName: user.displayName || null,
-    companyName: user.companyName || null,
+    displayName: displayName,
   };
 }
+
+
   }
