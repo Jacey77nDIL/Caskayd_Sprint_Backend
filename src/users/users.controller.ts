@@ -116,10 +116,10 @@ export class UsersController {
     return this.usersService.updateAvatar(req.user.sub, url);
   }
 
- @UseGuards(JwtAuthGuard)
+
+@UseGuards(JwtAuthGuard)
 @Get("profile")
-getProfile(@Req() req) {
+async getProfile(@Req() req) {
   return this.usersService.getMarketplaceProfile(req.user.sub);
 }
- 
 }

@@ -36,6 +36,7 @@ export class BusinessService {
   if (!profile) {
     profile = new BusinessProfile();
     profile.user = { id: userId } as any;
+    profile.userId = userId; 
   }
 
   Object.assign(profile, dto);

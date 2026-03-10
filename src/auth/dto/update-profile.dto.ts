@@ -7,6 +7,9 @@ export class UpdateProfileDto {
 
   pricePerPost?: number;
 
+
+  displayName?: string; 
+
   companyName?: string;
-  website?: string;
+  websiteUrl?: string;   
 }
