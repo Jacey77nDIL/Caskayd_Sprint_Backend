@@ -192,20 +192,24 @@ async getAllCreators() {
   }));
   }
 
- async updateProfile(userId: string, dto: any) {
+async updateProfile(userId: string, dto: any) {
+
   let profile = await this.repo.findOne({
     where: { user: { id: userId } },
   });
 
   if (!profile) {
-    profile = new CreatorProfile();   // create instance safely
+    profile = new CreatorProfile();
     profile.user = { id: userId } as any;
+    profile.userId = userId;   // VERY IMPORTANT
   }
 
   Object.assign(profile, dto);
 
   return this.repo.save(profile);
 }
+
+
 
   async recommendCreators(category: string) {
   const categoryMap = {

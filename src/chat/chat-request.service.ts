@@ -43,16 +43,35 @@ export class ChatRequestService {
     return request;
   }
 
-  async findForCreator(id: string) {
+async findForCreator(id: string) {
 
   const userId =
     await this.resolveUserIdService.resolveUserId(id);
 
-  return this.repo.find({
-    where: { creator: { id: userId }, status: "PENDING" },
-    relations: ["business"],
-  });
+  const requests = await this.repo
+    .createQueryBuilder("request")
+    .leftJoinAndSelect("request.business", "business")
+    .leftJoin("business_profile", "businessProfile", "businessProfile.userId = business.id")
+    .where("request.creatorId = :userId", { userId })
+    .andWhere("request.status = :status", { status: "PENDING" })
+    .orderBy("request.createdAt", "DESC")
+    .getMany();
+
+  return requests.map((req: any) => ({
+    id: req.id,
+    message: req.message,
+    proposedPrice: req.proposedPrice,
+    createdAt: req.createdAt,
+
+    businessId: req.business.id,
+    avatar: req.business.avatar,
+
+    displayName:
+      req.businessProfile?.companyName ||
+      "Business",
+  }));
 }
+
 
     async accept(requestId: string) {
     const request = await this.repo.findOne({
@@ -89,4 +108,25 @@ export class ChatRequestService {
         status: "REJECTED",
     });
     }
+
+    async countAcceptedByCreator(creatorId: string) {
+    const userId =
+      await this.resolveUserIdService.resolveUserId(creatorId);
+
+    return this.repo.count({
+      where: {
+        creator: { id: userId },
+        status: "ACCEPTED",
+      },
+    });
+  }
+
+async countSentByBusiness(businessId: string) {
+  return this.repo.count({
+    where: {
+      business: { id: businessId },
+    },
+  });
+}
+
 }

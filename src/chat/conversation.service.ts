@@ -10,14 +10,37 @@ export class ConversationService {
     private repo: Repository<Conversation>,
   ) {}
 
-  findUserConversations(userId: string) {
-    return this.repo.find({
-      where: [
-        { creator: { id: userId } },
-        { business: { id: userId } },
-      ],
-      relations: ["creator", "business"],
-      order: { createdAt: "DESC" },
-    });
-  }
+  async findUserConversations(userId: string) {
+
+  const conversations = await this.repo
+    .createQueryBuilder("conversation")
+    .leftJoinAndSelect("conversation.creator", "creator")
+    .leftJoinAndSelect("conversation.business", "business")
+    .leftJoin("creator_profile", "creatorProfile", "creatorProfile.userId = creator.id")
+    .leftJoin("business_profile", "businessProfile", "businessProfile.userId = business.id")
+    .orderBy("conversation.createdAt", "DESC")
+    .getMany();
+
+  return conversations.map((conv: any) => {
+
+    const isCreator = conv.creator.id === userId;
+
+    const otherUser = isCreator ? conv.business : conv.creator;
+
+    return {
+      conversationId: conv.id,
+
+      userId: otherUser.id,
+
+      avatar: otherUser.avatar,
+
+      displayName:
+        isCreator
+          ? conv.businessProfile?.companyName
+          : conv.creatorProfile?.displayName,
+    };
+  });
+}
+
+
 }

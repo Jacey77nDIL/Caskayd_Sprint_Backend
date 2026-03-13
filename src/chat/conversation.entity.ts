@@ -27,4 +27,11 @@ export class Conversation {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true })
+lastMessage: string;
+
+@Column({ nullable: true })
+lastMessageAt: Date;
+
 }

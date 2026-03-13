@@ -34,4 +34,21 @@ export class ChatRequestController {
   reject(@Param("id") id: string) {
     return this.service.reject(id);
   }
+
+  @UseGuards(AuthGuard("jwt"))
+@Get("creator/accepted-count")
+async acceptedCount(@Req() req) {
+  const count = await this.service.countAcceptedByCreator(req.user.sub);
+
+  return { acceptedRequests: count };
+}
+
+@UseGuards(AuthGuard("jwt"))
+@Get("business/sent-count")
+async sentCount(@Req() req) {
+  const count = await this.service.countSentByBusiness(req.user.sub);
+
+  return { requestsSent: count };
+}
+
 }

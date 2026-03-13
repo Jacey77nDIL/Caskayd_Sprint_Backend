@@ -74,6 +74,10 @@ export class UsersService {
     .where("user.id = :userId", { userId })
     .getRawOne();
 
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
   const displayName =
     user.creatorDisplayName || user.businessName || null;
 
@@ -82,9 +86,7 @@ export class UsersService {
     email: user.email,
     avatar: user.avatar,
     role: user.role,
-    displayName: displayName,
+    displayName,
   };
 }
-
-
-  }
+}
