@@ -18,29 +18,28 @@ export class ConversationService {
     .leftJoinAndSelect("conversation.business", "business")
     .leftJoin("creator_profile", "creatorProfile", "creatorProfile.userId = creator.id")
     .leftJoin("business_profile", "businessProfile", "businessProfile.userId = business.id")
+
+    .addSelect([
+    "creatorProfile.displayName",
+    "businessProfile.companyName"
+  ])
+  
+    .where("creator.id = :userId OR business.id = :userId", { userId })
     .orderBy("conversation.createdAt", "DESC")
     .getMany();
 
   return conversations.map((conv: any) => {
 
     const isCreator = conv.creator.id === userId;
-
     const otherUser = isCreator ? conv.business : conv.creator;
 
     return {
       conversationId: conv.id,
-
       userId: otherUser.id,
-
       avatar: otherUser.avatar,
-
-      displayName:
-        isCreator
-          ? conv.businessProfile?.companyName
-          : conv.creatorProfile?.displayName,
+      displayName: isCreator
+        ? conv.businessProfile?.companyName
+        : conv.creatorProfile?.displayName,
     };
   });
-}
-
-
-}
+}}

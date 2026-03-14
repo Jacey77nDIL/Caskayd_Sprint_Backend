@@ -52,6 +52,7 @@ async findForCreator(id: string) {
     .createQueryBuilder("request")
     .leftJoinAndSelect("request.business", "business")
     .leftJoin("business_profile", "businessProfile", "businessProfile.userId = business.id")
+    .addSelect("businessProfile.companyName")
     .where("request.creatorId = :userId", { userId })
     .andWhere("request.status = :status", { status: "PENDING" })
     .orderBy("request.createdAt", "DESC")
